@@ -99,7 +99,7 @@ public class ArrayDeque<T> {
     private class ArrayDequeIterator implements Iterator<T> {
         private int p;
 
-        ArrayDeque() { p = 0;}
+        ArrayDequeIterator() { p = 0;}
 
         @Override
         public boolean hasNext() {
@@ -116,7 +116,8 @@ public class ArrayDeque<T> {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof ArrayDeque lld) {
+        if (o instanceof ArrayDeque) {
+            ArrayDeque<?> lld = (ArrayDeque<?>) o;
             if (size != lld.size()) {
                 return false;
             }

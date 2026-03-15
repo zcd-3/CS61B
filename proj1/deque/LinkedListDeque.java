@@ -134,7 +134,8 @@ public class LinkedListDeque<T> {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof LinkedListDeque lld) {
+        if (o instanceof LinkedListDeque) {
+            LinkedListDeque<?> lld = (LinkedListDeque<?>) o;
             if (size != lld.size()) {
                 return false;
             }
