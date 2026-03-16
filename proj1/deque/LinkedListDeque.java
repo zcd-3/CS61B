@@ -73,7 +73,9 @@ public class LinkedListDeque<T> implements Deque<T> {
     }
 
     @Override
-    public int size() { return size; }
+    public int size() {
+        return size;
+    }
 
     @Override
     public T get(int index) {

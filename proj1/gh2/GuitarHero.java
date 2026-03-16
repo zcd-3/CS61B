@@ -11,8 +11,8 @@ public class GuitarHero {
     public static void main(String[] args) {
         GuitarString[] strings = new GuitarString[37];
         for (int i = 0; i < 37; i++) {
-            double Consert = 440.0 * Math.pow(2, (i - 24) / 12);
-            strings[i] = new GuitarString(Consert);
+            double consert = 440.0 * Math.pow(2, (i - 24) / 12);
+            strings[i] = new GuitarString(consert);
         }
         while (true) {
 

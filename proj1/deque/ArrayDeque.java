@@ -16,7 +16,9 @@ public class ArrayDeque<T> implements Deque<T> {
     }
 
     @Override
-    public int size() { return size; }
+    public int size() {
+        return size;
+    }
 
     private void resize(int s) {
         T[] newItems = (T[]) new Object[s];
@@ -97,12 +99,16 @@ public class ArrayDeque<T> implements Deque<T> {
         System.out.println();
     }
 
-    public Iterator<T> iterator() { return new ArrayDequeIterator(); }
+    public Iterator<T> iterator() {
+        return new ArrayDequeIterator();
+    }
 
     private class ArrayDequeIterator implements Iterator<T> {
         private int p;
 
-        ArrayDequeIterator() { p = 0; }
+        ArrayDequeIterator() {
+            p = 0;
+        }
 
         @Override
         public boolean hasNext() {

@@ -2,7 +2,7 @@ package deque;
 
 import java.util.Iterator;
 
-public interface Deque<T> {
+public interface Deque<T> extends Iterable<T> {
     void addFirst(T item);
     void addLast(T item);
     default boolean isEmpty() {
@@ -13,5 +13,6 @@ public interface Deque<T> {
     T removeFirst();
     T removeLast();
     T get(int index);
+    @Override
     Iterator<T> iterator();
 }
