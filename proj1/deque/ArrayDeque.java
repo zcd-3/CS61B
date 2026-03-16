@@ -16,12 +16,12 @@ public class ArrayDeque<T> implements Deque<T> {
     }
 
     @Override
-    public int size() {return size;}
+    public int size() { return size; }
 
     private void resize(int s) {
         T[] newItems = (T[]) new Object[s];
         int firstIdx = (s - size) / 2;
-        System.arraycopy(items, nextFirst+1, newItems, firstIdx, size);
+        System.arraycopy(items, nextFirst + 1, newItems, firstIdx, size);
         items = newItems;
         nextFirst = firstIdx - 1;
         nextLast = firstIdx + size;
@@ -97,12 +97,12 @@ public class ArrayDeque<T> implements Deque<T> {
         System.out.println();
     }
 
-    public Iterator<T> iterator() {return new ArrayDequeIterator();}
+    public Iterator<T> iterator() { return new ArrayDequeIterator(); }
 
     private class ArrayDequeIterator implements Iterator<T> {
         private int p;
 
-        ArrayDequeIterator() { p = 0;}
+        ArrayDequeIterator() { p = 0; }
 
         @Override
         public boolean hasNext() {
@@ -119,13 +119,13 @@ public class ArrayDeque<T> implements Deque<T> {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof ArrayDeque) {
-            ArrayDeque<?> lld = (ArrayDeque<?>) o;
+        if (o instanceof Deque) {
+            Deque<?> lld = (Deque<?>) o;
             if (size != lld.size()) {
                 return false;
             }
             for (int i = 0; i < size; i++) {
-                if (lld.get(i) != get(i)) {
+                if (!(lld.get(i).equals(get(i)))) {
                     return false;
                 }
             }
