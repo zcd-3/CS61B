@@ -75,6 +75,7 @@ public class Commit implements Serializable {
 
     /** Get the parent CommitID. */
     public String getParentID() { return parent; }
+    public String getSecondParentID() { return secondParent; }
 
     /** Get the message of the Commit. */
     public String getMessage() { return message; }

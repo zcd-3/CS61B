@@ -211,7 +211,7 @@ public class Repository {
     /** status method */
     public static void status() {
         /// branches part
-        System.out.println("===  Branches ===");
+        System.out.println("=== Branches ===");
         String curHead = getCurHead();
         List<String> branches = plainFilenamesIn(HEAD_DIR);
         System.out.println("*" + curHead);
@@ -489,22 +489,47 @@ public class Repository {
     private static String splitPoint(String head) {
         String headA = getCurCommitID();
         String headB = readHead(head);
-        while (!headA.equals(headB)) {
-            headA = readParentID(headA);
-            headB = readParentID(headB);
-            if (headA == null) {
-                headA = readHead(head);
-            }
-            if (headB == null) {
-                headB = getCurCommitID();
+
+        Map<String, Integer> disToA = disFrom(headA);
+        Map<String, Integer> disToB = disFrom(headB);
+
+        String best = null;
+        int minSum = Integer.MAX_VALUE;
+        for(String id : disToA.keySet()) {
+            Integer db = disToB.get(id);
+            if (db != null && db < minSum) {
+                int sum = db + disToA.get(id);
+                if (sum < minSum) {
+                    minSum = sum;
+                    best = id;
+                }
             }
         }
-        return headA;
+        return best;
     }
 
-    /** return the parent id with the given id */
-    private static String readParentID(String ID) {
-        return readCommit(ID).getParentID();
+    /** Returns shortest distance from head to each ancestor. */
+    private static Map<String, Integer> disFrom(String head) {
+        Map<String, Integer> dist = new HashMap<>();
+        ArrayDeque<String> que = new ArrayDeque<>();
+        dist.put(head, 0);
+        que.addLast(head);
+        while (!que.isEmpty()) {
+            String id = que.removeFirst();
+            int d = dist.get(id);
+            Commit c = readCommit(id);
+            String parent = c.getParentID();
+            String secondParent = c.getSecondParentID();
+            if (parent != null && !dist.containsKey(parent)) {
+                dist.put(parent, d + 1);
+                que.addLast(parent);
+            }
+            if (secondParent != null && !dist.containsKey(secondParent)) {
+                dist.put(secondParent, d + 1);
+                que.addLast(secondParent);
+            }
+        }
+        return dist;
     }
 
     /** helper function for debug. */
