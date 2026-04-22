@@ -1,10 +1,10 @@
 # Gitlet Design Document
 
-**Name**:
+**Name**: zcd3
 
 ## Classes and Data Structures
 
-### Class 1
+### Repository
 
 #### Fields
 
@@ -23,4 +23,22 @@
 ## Algorithms
 
 ## Persistence
-
+```
+CWD
+└── .gitlet
+    ├── HEAD
+    ├── stage
+    ├── commits
+    │   ├── <commitId1>
+    │   ├── <commitId2>
+    │   └── ...
+    ├── blobs
+    │   ├── <blobId1>
+    │   ├── <blobId2>
+    │   └── ...
+    └── refs
+        └── heads
+            ├── master
+            ├── dev
+            └── ...
+```
