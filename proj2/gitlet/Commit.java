@@ -38,10 +38,10 @@ public class Commit implements Serializable {
 
     /** Get the ID of this Commit and store it. */
     public String getID() {
-        String ID = Utils.sha1(Utils.serialize(this));
-        File c = Utils.join(Repository.COMMIT_DIR, ID);
+        String Id = Utils.sha1(Utils.serialize(this));
+        File c = Utils.join(Repository.COMMIT_DIR, Id);
         Utils.writeObject(c, this);
-        return ID;
+        return Id;
     }
 
     /** GetFile method for checkout command. */
@@ -53,7 +53,9 @@ public class Commit implements Serializable {
         return null;
     }
 
-    public Map<String, String> getPathToBlobs() { return pathToBlobs; }
+    public Map<String, String> getPathToBlobs() {
+        return pathToBlobs;
+    }
 
     /** GetFile method for add command. */
     public String getBlobID(String name) {
@@ -74,11 +76,18 @@ public class Commit implements Serializable {
     }
 
     /** Get the parent CommitID. */
-    public String getParentID() { return parent; }
-    public String getSecondParentID() { return secondParent; }
+    public String getParentID() {
+        return parent;
+    }
+
+    public String getSecondParentID() {
+        return secondParent;
+    }
 
     /** Get the message of the Commit. */
-    public String getMessage() { return message; }
+    public String getMessage() {
+        return message;
+    }
 
     /** Update the stage area to a new commit. */
     public void clearStage() {
@@ -103,9 +112,9 @@ public class Commit implements Serializable {
         return s;
     }
 
-    public void print(String ID) {
+    public void print(String Id) {
         System.out.println("===");
-        System.out.println("commit " + ID);
+        System.out.println("commit " + Id);
         if (secondParent != null) {
             System.out.println("Merge: " + abbrev(parent) + " " + abbrev(secondParent));
         }

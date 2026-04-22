@@ -34,23 +34,25 @@ public class Repository {
      */
 
     /** The current working directory. */
-    public static final File CWD = new File(System.getProperty("user.dir"));
+    public static File CWD = new File(System.getProperty("user.dir"));
     /** The .gitlet directory. */
     /** The rest directories. */
-    public static final File GITLET_DIR = join(CWD, ".gitlet");
-    public static final File BLOB_DIR = join(GITLET_DIR, "blobs");
-    public static final File COMMIT_DIR = join(GITLET_DIR, "commits");
-    public static final File REFS_DIR = join(GITLET_DIR, "refs");
-    public static final File HEAD_DIR = join(REFS_DIR, "heads");
+    public static File GITLET_DIR = join(CWD, ".gitlet");
+    public static File BLOB_DIR = join(GITLET_DIR, "blobs");
+    public static File COMMIT_DIR = join(GITLET_DIR, "commits");
+    public static File REFS_DIR = join(GITLET_DIR, "refs");
+    public static File HEAD_DIR = join(REFS_DIR, "heads");
+    public static File REMOTE_DIR = join(REFS_DIR, "remotes");
 
     /** Files */
-    public static final File HEAD = join(GITLET_DIR, "HEAD");
-    public static final File STAGE = join(GITLET_DIR, "stage");
+    public static File HEAD = join(GITLET_DIR, "HEAD");
+    public static File STAGE = join(GITLET_DIR, "stage");
 
     /** init method */
     public static void init() {
+        String msg = "A Gitlet version-control system already exists in the current directory.";
         if (GITLET_DIR.exists()) {
-            Utils.exitWithMessage("A Gitlet version-control system already exists in the current directory.");
+            Utils.exitWithMessage(msg);
         }
 
         /// initiallize
@@ -104,9 +106,14 @@ public class Repository {
     }
 
     /** Update the current head with a new Commit ID. */
-    private static void updateCurHead(String s) { writeContents(join(HEAD_DIR, getCurHead()), s);}
+    private static void updateCurHead(String s) {
+        writeContents(join(HEAD_DIR, getCurHead()), s);
+    }
+
     /** Rewrite the current head. */
-    private static void rewriteCurHead(String s) { writeContents(HEAD, s); }
+    private static void rewriteCurHead(String s) {
+        writeContents(HEAD, s);
+    }
 
     /** Create a new branch. */
     public static void createBranch(String name) {
@@ -153,6 +160,7 @@ public class Repository {
     public static void commit(String message) {
         commit(message, null);
     }
+
     private static void commit(String message, String secondParent) {
         if (message.equals("")) {
             exitWithMessage("Please enter a commit message.");
@@ -162,8 +170,8 @@ public class Repository {
         }
         Commit c = new Commit(message, secondParent);
         c.clearStage();
-        String ID = c.getID();
-        updateCurHead(ID);
+        String Id = c.getID();
+        updateCurHead(Id);
     }
 
     /** log method */
@@ -230,7 +238,7 @@ public class Repository {
         System.out.println("=== Staged Files ===");
         List<String> addNames = new ArrayList<>(addStage.keySet());
         Collections.sort(addNames);
-        for(String name : addNames) {
+        for (String name : addNames) {
             System.out.println(name);
         }
         System.out.println();
@@ -244,7 +252,7 @@ public class Repository {
 
         /// EC part
         Map<String, String> commits = getCurCommit().getPathToBlobs();
-        List<String> cwdList = plainFilenamesIn(CWD);/// already sorted
+        List<String> cwdList = plainFilenamesIn(CWD); /// already sorted
         if (cwdList == null) { /// guard against NPE
             cwdList = Collections.emptyList();
         }
@@ -253,7 +261,9 @@ public class Repository {
         System.out.println("=== Modifications Not Staged For Commit ===");
         List<String> modified = new ArrayList<>();
         for (String s : commits.keySet()) {
-            if (addStage.containsKey(s)) { continue; }
+            if (addStage.containsKey(s)) {
+                continue;
+            }
             if (cwd.contains(s)) {
                 if (!Arrays.equals(readBlob(commits.get(s)), readContents(join(CWD, s)))) {
                     modified.add(s + " (modified)");
@@ -323,20 +333,26 @@ public class Repository {
         if (cwdList == null) { /// guard against NPE
             cwdList = Collections.emptyList();
         }
+        String msg = "There is an untracked file in the way; delete it, or add and commit it first.";
         for (String s : cwdList) {
-            if ((removeStage.contains(s) || (!addStage.containsKey(s) && !commits.containsKey(s))) && newCommits.containsKey(s)) {
-                exitWithMessage("There is an untracked file in the way; delete it, or add and commit it first.");
+            boolean b1 = removeStage.contains(s);
+            boolean b2 = addStage.containsKey(s);
+            boolean b3 = commits.containsKey(s);
+            boolean b4 = newCommits.containsKey(s);
+            if ((b1 || (!b2 && !b3)) && b4) {
+                exitWithMessage(msg);
             }
         }
-
-        for (Map.Entry<String, String> e : newCommits.entrySet()) {/// overwrite
+        /// overwrite
+        for (Map.Entry<String, String> e : newCommits.entrySet()) {
             String fileName = e.getKey();
             String blobID = e.getValue();
             byte[] content = readBlob(blobID);
             File f = join(CWD, fileName);
             writeContents(f, content);
         }
-        for (String s : commits.keySet()) {/// delete
+        /// delete
+        for (String s : commits.keySet()) {
             if (!newCommits.containsKey(s)) {
                 if (removeStage.contains(s) && cwdList.contains(s)) {
                     continue;
@@ -414,14 +430,17 @@ public class Repository {
         if (cwdList == null) { /// guard against NPE
             cwdList = Collections.emptyList();
         }
+        String msg = "There is an untracked file in the way; delete it, or add and commit it first.";
         for (String s : cwdList) {
             if (!curCommits.containsKey(s)) {
-                if (!splitCommits.containsKey(s) && newCommits.containsKey(s)) {
-                    exitWithMessage("There is an untracked file in the way; delete it, or add and commit it first.");
+                boolean b1 = splitCommits.containsKey(s);
+                boolean b2 = newCommits.containsKey(s);
+                if (!b1 && b2) {
+                    exitWithMessage(msg);
                 }
-                if (splitCommits.containsKey(s) && newCommits.containsKey(s)) {
+                if (b1 && b2) {
                     if (!splitCommits.get(s).equals(newCommits.get(s))) {
-                        exitWithMessage("There is an untracked file in the way; delete it, or add and commit it first.");
+                        exitWithMessage(msg);
                     }
                 }
             }
@@ -439,7 +458,9 @@ public class Repository {
             boolean cEn = Objects.equals(c, n);
             boolean sEc = Objects.equals(s, c);
             boolean sEn = Objects.equals(s, n);
-            if (cEn || sEn) { continue; }
+            if (cEn || sEn) {
+                continue;
+            }
             if (sEc) {
                 if (n == null) {
                     removeFile(f);
@@ -495,7 +516,7 @@ public class Repository {
 
         String best = null;
         int minSum = Integer.MAX_VALUE;
-        for(String id : disToA.keySet()) {
+        for (String id : disToA.keySet()) {
             Integer db = disToB.get(id);
             if (db != null && db < minSum) {
                 int sum = db + disToA.get(id);
@@ -532,10 +553,178 @@ public class Repository {
         return dist;
     }
 
-    /** helper function for debug. */
-    public static void helper() {
-        Stage stg = getStage();
-        System.out.println("Stage: " + stg.getAddStage() + " " + stg.getRemoveStage());
-        System.out.println("Commit " + getCurCommitID() + ": " + getCurCommit().getPathToBlobs());
+    private static void changeCurGitletDir(String path) {
+        GITLET_DIR = new File(path);
+        CWD = GITLET_DIR.getParentFile();
+        COMMIT_DIR = join(GITLET_DIR, "commits");
+        BLOB_DIR = join(GITLET_DIR, "blobs");
+        STAGE = join(GITLET_DIR, "stage");
+        HEAD = join(GITLET_DIR, "HEAD");
+        REFS_DIR = join(GITLET_DIR, "refs");
+        REMOTE_DIR = join(GITLET_DIR, "remotes");
+        HEAD_DIR = join(GITLET_DIR, "heads");
+    }
+
+    private static void changeBackGitletDir() {
+        changeCurGitletDir(System.getProperty("user.dir") + File.separator + ".gitlet");
+    }
+
+    /** add-remote method */
+    public static void addRemote(String name, String path) {
+        File f = join(REMOTE_DIR, name);
+        if (f.exists()) {
+            exitWithMessage("A remote with that name already exists.");
+        }
+        String remotePath = path.replace("/", File.separator);
+        writeContents(f, remotePath);
+    }
+
+    /** rm-remote method */
+    public static void removeRemote(String name) {
+        File f = join(REMOTE_DIR, name);
+        if (!f.exists()) {
+            exitWithMessage("A remote with that name does not exist.");
+        }
+        f.delete();
+    }
+
+
+    private static String checkRemote(String name) {
+        File f = join(REMOTE_DIR, name);
+        if (!f.exists()) {
+            exitWithMessage("Remote directory not found.");
+        }
+        String remotePath = readContentsAsString(f);
+        File g = new File(remotePath);
+        if (!g.exists()) {
+            exitWithMessage("Remote directory not found.");
+        }
+        return remotePath;
+    }
+
+    /** push method */
+    public static void push(String name, String branch) {
+        String remotePath = checkRemote(name);
+
+        File remoteHeadFile = join(remotePath, "refs", "heads", branch);
+        /// if branch not exist, create it
+        if (!remoteHeadFile.exists()) {
+            changeCurGitletDir(remotePath);
+            createBranch(branch);
+            changeBackGitletDir();
+        }
+        String remoteHead = readContentsAsString(remoteHeadFile);
+        String curHeadId = getCurCommitID();
+        Set<String> curReachable = allReachableCommits(curHeadId);
+        if (!curReachable.contains(remoteHead)) {
+            exitWithMessage("Please pull down remote changes before pushing.");
+        }
+
+        changeCurGitletDir(remotePath);
+        Set<String> remoteReachable = allReachableCommits(remoteHead);
+        changeBackGitletDir();
+        curReachable.removeAll(remoteReachable); ///commits to copy
+
+        copyCommitsTo(curReachable, remotePath);
+
+        /// Update remote head
+        writeContents(remoteHeadFile, curHeadId);
+    }
+
+    /** Return all commits reachable from the given commit. */
+    private static Set<String> allReachableCommits(String start) {
+        ArrayDeque<String> que = new ArrayDeque<>();
+        Set<String> result = new HashSet<>();
+
+        que.addLast(start);
+        result.add(start);
+        while (!que.isEmpty()) {
+            String cur = que.removeFirst();
+            Commit c = readCommit(cur);
+            String p1 = c.getParentID();
+            String p2 = c.getSecondParentID();
+            if (p1 != null && result.add(p1)) {
+                que.addLast(p1);
+            }
+            if (p2 != null && result.add(p2)) {
+                que.addLast(p2);
+            }
+        }
+        return result;
+    }
+
+    /** Copy commits to given remote path. */
+    private static void copyCommitsTo(Set<String> commits, String remotePath) {
+        File REMOTE_COMMIT_DIR = join(remotePath, "commits");
+        for (String c : commits) {
+            File newCommit = join(REMOTE_COMMIT_DIR, c);
+            writeObject(newCommit, readCommit(c));
+            copyBlobsTo(c, remotePath);
+        }
+
+    }
+
+    /** Copy blobs of a commit to given remote path. */
+    private static void copyBlobsTo(String commit, String remotePath) {
+        File REMOTE_BLOB_DIR = join(remotePath, "blobs");
+        Set<String> blobs = new HashSet<>(readCommit(commit).getPathToBlobs().values());
+        for (String b : blobs) {
+            File newBlob = join(REMOTE_BLOB_DIR, b);
+            if (!newBlob.exists()) {
+                writeContents(newBlob, readBlob(b));
+            }
+        }
+    }
+
+    /** fetch method */
+    public static void fetch(String name, String branch) {
+        String remotePath = checkRemote(name);
+        File remoteHeadFile = join(remotePath, "refs", "heads", branch);
+        if (!remoteHeadFile.exists()) {
+            exitWithMessage("That remote does not have that branch.");
+        }
+        String remoteHead = readContentsAsString(remoteHeadFile);
+        File localHead = join(HEAD_DIR, name + "/" + branch);
+        writeContents(localHead, remoteHead);
+
+        changeCurGitletDir(remotePath);
+        Set<String> remoteReachable = allReachableCommits(remoteHead);
+        changeBackGitletDir();
+        copyCommitsFrom(remoteReachable, remoteHead);
+    }
+
+    /** Copy commits from the given remote path. */
+    private static void copyCommitsFrom(Set<String> commits, String remotePath) {
+        File REMOTE_COMMIT_DIR = join(remotePath, "commits");
+        for (String c : commits) {
+            File localCommit = join(COMMIT_DIR, c);
+            if (localCommit.exists()) {
+                continue;
+            }
+            File remoteCommit = join(REMOTE_COMMIT_DIR, c);
+            Commit r = readObject(remoteCommit, Commit.class);
+            writeObject(localCommit, r);
+            copyBlobsFrom(r, remotePath);
+        }
+
+    }
+
+    /** Copy blobs of a commit from the given remote path. */
+    private static void copyBlobsFrom(Commit c, String remotePath) {
+        File REMOTE_BLOB_DIR = join(remotePath, "blobs");
+        Set<String> blobs = new HashSet<>(c.getPathToBlobs().values());
+        for (String b : blobs) {
+            File localBlob = join(BLOB_DIR, b);
+            if (!localBlob.exists()) {
+                File remoteBlob = join(REMOTE_BLOB_DIR, b);
+                writeContents(localBlob, readContents(remoteBlob));
+            }
+        }
+    }
+
+    /** pull method */
+    public static void pull(String name, String branch) {
+        fetch(name, branch);
+        merge(name + "/" + branch);
     }
 }

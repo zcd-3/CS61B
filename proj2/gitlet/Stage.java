@@ -18,8 +18,12 @@ public class Stage implements Serializable {
         removeStage = new HashSet<>();
     }
 
-    public Map<String, String> getAddStage() { return addStage; }
-    public Set<String> getRemoveStage() { return removeStage; }
+    public Map<String, String> getAddStage() {
+        return addStage;
+    }
+    public Set<String> getRemoveStage() {
+        return removeStage;
+    }
 
     /** finish the work of add command. */
     public void addFile(String name) {
@@ -27,7 +31,7 @@ public class Stage implements Serializable {
         String curID = b.getID();
         String blobInCommit = blobInCommit(name);
         if (blobInCommit != null && blobInCommit.equals(curID)) {
-            addStage.remove(name);/// if the file in the cwd identify with the one in current commit
+            addStage.remove(name); /// if the file in the cwd identify with the one in current commit
         } else {
             b.save();
             addStage.put(name, curID);

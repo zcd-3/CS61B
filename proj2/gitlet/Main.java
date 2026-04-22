@@ -79,11 +79,27 @@ public class Main {
                 checkInitialized();
                 Repository.merge(args[1]);
                 break;
-            case "helper":
-                validateNumArgs(args, 1);
+            case "add-remote":
+                validateNumArgs(args, 3);
                 checkInitialized();
-                Repository.helper();
+                Repository.addRemote(args[1], args[2]);
                 break;
+            case "rm-remote":
+                validateNumArgs(args, 2);
+                checkInitialized();
+                Repository.removeRemote(args[1]);
+            case "push":
+                validateNumArgs(args, 3);
+                checkInitialized();
+                Repository.push(args[1], args[2]);
+            case "fetch":
+                validateNumArgs(args, 3);
+                checkInitialized();
+                Repository.fetch(args[1], args[2]);
+            case "pull":
+                validateNumArgs(args, 3);
+                checkInitialized();
+                Repository.pull(args[1], args[2]);
             default:
                 Utils.exitWithMessage("No command with that name exists.");
         }
