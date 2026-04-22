@@ -27,26 +27,57 @@ public class Repository {
      *     │   ├── <blobId2>
      *     │   └── ...
      *     └── refs
-     *         └── heads
-     *             ├── master
-     *             ├── dev
+     *         ├── heads
+     *         │   ├── master
+     *         │   ├── dev
+     *         │   └── ...
+     *         └── remotes
+     *             ├── <remote-name>
      *             └── ...
      */
 
     /** The current working directory. */
-    public static File CWD = new File(System.getProperty("user.dir"));
+    private static File CWD = new File(System.getProperty("user.dir"));
     /** The .gitlet directory. */
+    private static File GITLET_DIR = join(CWD, ".gitlet");
     /** The rest directories. */
-    public static File GITLET_DIR = join(CWD, ".gitlet");
-    public static File BLOB_DIR = join(GITLET_DIR, "blobs");
-    public static File COMMIT_DIR = join(GITLET_DIR, "commits");
-    public static File REFS_DIR = join(GITLET_DIR, "refs");
-    public static File HEAD_DIR = join(REFS_DIR, "heads");
-    public static File REMOTE_DIR = join(REFS_DIR, "remotes");
+    private static File BLOB_DIR = join(GITLET_DIR, "blobs");
+    private static File COMMIT_DIR = join(GITLET_DIR, "commits");
+    private static File REFS_DIR = join(GITLET_DIR, "refs");
+    private static File HEAD_DIR = join(REFS_DIR, "heads");
+    private static File REMOTE_DIR = join(REFS_DIR, "remotes");
 
     /** Files */
     public static File HEAD = join(GITLET_DIR, "HEAD");
     public static File STAGE = join(GITLET_DIR, "stage");
+
+    public static File getCWD() {
+        return CWD;
+    }
+    public static File getGitletDir() {
+        return GITLET_DIR;
+    }
+    public static File getBlobDir() {
+        return BLOB_DIR;
+    }
+    public static File getCommitDir() {
+        return COMMIT_DIR;
+    }
+    public static File getRefsDir() {
+        return REFS_DIR;
+    }
+    public static File getHeadDir() {
+        return HEAD_DIR;
+    }
+    public static File getRemoteDir() {
+        return REMOTE_DIR;
+    }
+    public static File getHEAD() {
+        return HEAD;
+    }
+    public static File getSTAGE() {
+        return STAGE;
+    }
 
     /** init method */
     public static void init() {
@@ -61,6 +92,7 @@ public class Repository {
         COMMIT_DIR.mkdir();
         REFS_DIR.mkdir();
         HEAD_DIR.mkdir();
+        REMOTE_DIR.mkdir();
         writeObject(STAGE, new Stage());
         Commit init = new Commit();
         File master = join(HEAD_DIR, "master");
@@ -404,6 +436,7 @@ public class Repository {
         }
         return match;
     }
+
     /** merge method */
     public static void merge(String head) {
         mergeCheck(head);
@@ -419,14 +452,11 @@ public class Repository {
             System.out.println("Current branch fast-forwarded.");
             return;
         }
-
         Map<String, String> splitCommits = readCommit(splitPoint).getPathToBlobs();
         Map<String, String> curCommits = readCommit(getCurCommitID()).getPathToBlobs();
         Map<String, String> newCommits = readCommit(newHeadID).getPathToBlobs();
         Stage stg = getStage();
-
-        /// dealing untracked files
-        List<String> cwdList = plainFilenamesIn(CWD);
+        List<String> cwdList = plainFilenamesIn(CWD); /// dealing untracked files
         if (cwdList == null) { /// guard against NPE
             cwdList = Collections.emptyList();
         }
@@ -445,7 +475,6 @@ public class Repository {
                 }
             }
         }
-
         Set<String> allFiles = new HashSet<>();
         allFiles.addAll(splitCommits.keySet());
         allFiles.addAll(curCommits.keySet());
@@ -471,7 +500,6 @@ public class Repository {
                     stg.addBlob(f, blob);
                 }
             } else {
-                /// conflict
                 conflictFlag = true;
                 File file = join(CWD, f);
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -480,8 +508,7 @@ public class Repository {
                 out.writeBytes("=======\n".getBytes(StandardCharsets.UTF_8));
                 out.writeBytes(readBlob(n));
                 out.writeBytes(">>>>>>>\n".getBytes(StandardCharsets.UTF_8));
-                byte[] merge = out.toByteArray();
-                writeContents(file, merge);
+                writeContents(file, out.toByteArray());
                 stg.addFile(f);
             }
         }
@@ -655,9 +682,9 @@ public class Repository {
 
     /** Copy commits to given remote path. */
     private static void copyCommitsTo(Set<String> commits, String remotePath) {
-        File REMOTE_COMMIT_DIR = join(remotePath, "commits");
+        File remoteCommitDir = join(remotePath, "commits");
         for (String c : commits) {
-            File newCommit = join(REMOTE_COMMIT_DIR, c);
+            File newCommit = join(remoteCommitDir, c);
             writeObject(newCommit, readCommit(c));
             copyBlobsTo(c, remotePath);
         }
@@ -666,10 +693,10 @@ public class Repository {
 
     /** Copy blobs of a commit to given remote path. */
     private static void copyBlobsTo(String commit, String remotePath) {
-        File REMOTE_BLOB_DIR = join(remotePath, "blobs");
+        File remoteBlobDir = join(remotePath, "blobs");
         Set<String> blobs = new HashSet<>(readCommit(commit).getPathToBlobs().values());
         for (String b : blobs) {
-            File newBlob = join(REMOTE_BLOB_DIR, b);
+            File newBlob = join(remoteBlobDir, b);
             if (!newBlob.exists()) {
                 writeContents(newBlob, readBlob(b));
             }
@@ -695,13 +722,13 @@ public class Repository {
 
     /** Copy commits from the given remote path. */
     private static void copyCommitsFrom(Set<String> commits, String remotePath) {
-        File REMOTE_COMMIT_DIR = join(remotePath, "commits");
+        File remoteCommitDir = join(remotePath, "commits");
         for (String c : commits) {
             File localCommit = join(COMMIT_DIR, c);
             if (localCommit.exists()) {
                 continue;
             }
-            File remoteCommit = join(REMOTE_COMMIT_DIR, c);
+            File remoteCommit = join(remoteCommitDir, c);
             Commit r = readObject(remoteCommit, Commit.class);
             writeObject(localCommit, r);
             copyBlobsFrom(r, remotePath);
@@ -711,12 +738,12 @@ public class Repository {
 
     /** Copy blobs of a commit from the given remote path. */
     private static void copyBlobsFrom(Commit c, String remotePath) {
-        File REMOTE_BLOB_DIR = join(remotePath, "blobs");
+        File remoteBlobDir = join(remotePath, "blobs");
         Set<String> blobs = new HashSet<>(c.getPathToBlobs().values());
         for (String b : blobs) {
             File localBlob = join(BLOB_DIR, b);
             if (!localBlob.exists()) {
-                File remoteBlob = join(REMOTE_BLOB_DIR, b);
+                File remoteBlob = join(remoteBlobDir, b);
                 writeContents(localBlob, readContents(remoteBlob));
             }
         }

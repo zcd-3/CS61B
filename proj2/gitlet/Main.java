@@ -113,7 +113,7 @@ public class Main {
 
     /** helper method, ensures that the current working directory contains an initialized Gitlet repository. */
     private static void checkInitialized() {
-        if (!Repository.GITLET_DIR.exists()) {
+        if (!Repository.getGitletDir().exists()) {
             exitWithMessage("Not in an initialized Gitlet directory.");
         }
     }

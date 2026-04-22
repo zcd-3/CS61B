@@ -27,11 +27,12 @@ public class Stage implements Serializable {
 
     /** finish the work of add command. */
     public void addFile(String name) {
-        Blob b = new Blob(Utils.join(Repository.CWD, name));
+        Blob b = new Blob(Utils.join(Repository.getCWD(), name));
         String curID = b.getID();
         String blobInCommit = blobInCommit(name);
         if (blobInCommit != null && blobInCommit.equals(curID)) {
-            addStage.remove(name); /// if the file in the cwd identify with the one in current commit
+            /// if the file in the cwd identify with the one in current commit
+            addStage.remove(name);
         } else {
             b.save();
             addStage.put(name, curID);
@@ -58,7 +59,7 @@ public class Stage implements Serializable {
         }
         if (tracked) {
             removeStage.add(name);
-            File f = Utils.join(Repository.CWD, name);
+            File f = Utils.join(Repository.getCWD(), name);
             Utils.restrictedDelete(f);
         }
         save();

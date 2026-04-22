@@ -23,8 +23,8 @@ public class Blob implements Serializable {
 
     /** Persist this blob object under its ID. */
     public void save() {
-        String Id = getID();
-        File b = Utils.join(Repository.BLOB_DIR, Id);
+        String id = getID();
+        File b = Utils.join(Repository.getBlobDir(), id);
         if (!b.exists()) {
             Utils.writeContents(b, contents);
         }

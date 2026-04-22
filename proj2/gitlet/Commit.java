@@ -38,10 +38,10 @@ public class Commit implements Serializable {
 
     /** Get the ID of this Commit and store it. */
     public String getID() {
-        String Id = Utils.sha1(Utils.serialize(this));
-        File c = Utils.join(Repository.COMMIT_DIR, Id);
+        String id = Utils.sha1(Utils.serialize(this));
+        File c = Utils.join(Repository.getCommitDir(), id);
         Utils.writeObject(c, this);
-        return Id;
+        return id;
     }
 
     /** GetFile method for checkout command. */
@@ -112,9 +112,9 @@ public class Commit implements Serializable {
         return s;
     }
 
-    public void print(String Id) {
+    public void print(String id) {
         System.out.println("===");
-        System.out.println("commit " + Id);
+        System.out.println("commit " + id);
         if (secondParent != null) {
             System.out.println("Merge: " + abbrev(parent) + " " + abbrev(secondParent));
         }
