@@ -589,8 +589,8 @@ public class Repository {
         STAGE = join(GITLET_DIR, "stage");
         HEAD = join(GITLET_DIR, "HEAD");
         REFS_DIR = join(GITLET_DIR, "refs");
-        REMOTE_DIR = join(GITLET_DIR, "remotes");
-        HEAD_DIR = join(GITLET_DIR, "heads");
+        REMOTE_DIR = join(REFS_DIR, "remotes");
+        HEAD_DIR = join(REFS_DIR, "heads");
     }
 
     private static void changeBackGitletDir() {
