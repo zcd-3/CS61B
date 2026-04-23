@@ -365,8 +365,8 @@ public class Repository {
         if (cwdList == null) { /// guard against NPE
             cwdList = Collections.emptyList();
         }
-        String msg = "There is an untracked file in the way;" +
-                " delete it, or add and commit it first.";
+        String msg = "There is an untracked file in the way;"
+                + " delete it, or add and commit it first.";
         for (String s : cwdList) {
             boolean b1 = removeStage.contains(s);
             boolean b2 = addStage.containsKey(s);
@@ -727,7 +727,7 @@ public class Repository {
         changeCurGitletDir(remotePath);
         Set<String> remoteReachable = allReachableCommits(remoteHead);
         changeBackGitletDir();
-        copyCommitsFrom(remoteReachable, remoteHead);
+        copyCommitsFrom(remoteReachable, remotePath);
     }
 
     /** Copy commits from the given remote path. */
