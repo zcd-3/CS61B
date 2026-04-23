@@ -88,18 +88,22 @@ public class Main {
                 validateNumArgs(args, 2);
                 checkInitialized();
                 Repository.removeRemote(args[1]);
+                break;
             case "push":
                 validateNumArgs(args, 3);
                 checkInitialized();
                 Repository.push(args[1], args[2]);
+                break;
             case "fetch":
                 validateNumArgs(args, 3);
                 checkInitialized();
                 Repository.fetch(args[1], args[2]);
+                break;
             case "pull":
                 validateNumArgs(args, 3);
                 checkInitialized();
                 Repository.pull(args[1], args[2]);
+                break;
             default:
                 Utils.exitWithMessage("No command with that name exists.");
         }

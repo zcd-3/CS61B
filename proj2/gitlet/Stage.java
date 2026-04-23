@@ -67,7 +67,7 @@ public class Stage implements Serializable {
 
     /** Save the staging area. */
     private void save() {
-        Utils.writeObject(Repository.STAGE, this);
+        Utils.writeObject(Repository.getSTAGE(), this);
     }
 
     /** Return the blob id of a file is in the current commit, return null if not exist. */

@@ -48,8 +48,8 @@ public class Repository {
     private static File REMOTE_DIR = join(REFS_DIR, "remotes");
 
     /** Files */
-    public static File HEAD = join(GITLET_DIR, "HEAD");
-    public static File STAGE = join(GITLET_DIR, "stage");
+    private static File HEAD = join(GITLET_DIR, "HEAD");
+    private static File STAGE = join(GITLET_DIR, "stage");
 
     public static File getCWD() {
         return CWD;
@@ -202,8 +202,8 @@ public class Repository {
         }
         Commit c = new Commit(message, secondParent);
         c.clearStage();
-        String Id = c.getID();
-        updateCurHead(Id);
+        String id = c.getID();
+        updateCurHead(id);
     }
 
     /** log method */
@@ -365,7 +365,8 @@ public class Repository {
         if (cwdList == null) { /// guard against NPE
             cwdList = Collections.emptyList();
         }
-        String msg = "There is an untracked file in the way; delete it, or add and commit it first.";
+        String msg = "There is an untracked file in the way;" +
+                " delete it, or add and commit it first.";
         for (String s : cwdList) {
             boolean b1 = removeStage.contains(s);
             boolean b2 = addStage.containsKey(s);
@@ -460,17 +461,17 @@ public class Repository {
         if (cwdList == null) { /// guard against NPE
             cwdList = Collections.emptyList();
         }
-        String msg = "There is an untracked file in the way; delete it, or add and commit it first.";
+        String m = "There is an untracked file in the way; delete it, or add and commit it first.";
         for (String s : cwdList) {
             if (!curCommits.containsKey(s)) {
                 boolean b1 = splitCommits.containsKey(s);
                 boolean b2 = newCommits.containsKey(s);
                 if (!b1 && b2) {
-                    exitWithMessage(msg);
+                    exitWithMessage(m);
                 }
                 if (b1 && b2) {
                     if (!splitCommits.get(s).equals(newCommits.get(s))) {
-                        exitWithMessage(msg);
+                        exitWithMessage(m);
                     }
                 }
             }
@@ -604,6 +605,8 @@ public class Repository {
         }
         String remotePath = path.replace("/", File.separator);
         writeContents(f, remotePath);
+        File dir = join(HEAD_DIR, name);
+        dir.mkdir();
     }
 
     /** rm-remote method */
@@ -613,6 +616,13 @@ public class Repository {
             exitWithMessage("A remote with that name does not exist.");
         }
         f.delete();
+        File dir = join(HEAD_DIR, name);
+        if (dir.exists() && dir.isDirectory()) {
+            for (File file : dir.listFiles()) {
+                file.delete();
+            }
+            dir.delete();
+        }
     }
 
 
