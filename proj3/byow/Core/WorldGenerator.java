@@ -178,7 +178,8 @@ public class WorldGenerator {
     }
 
     /** helper function of connectTwoRooms */
-    private static void drawHorizontalHallway(TETile[][] world, Random random, int x1, int x2, int y) {
+    private static void drawHorizontalHallway(TETile[][] world, Random random,
+                                              int x1, int x2, int y) {
         int width = RandomUtils.uniform(random, 1, 3);
         int start = Math.min(x1, x2);
         int end = Math.max(x1, x2);
@@ -191,7 +192,8 @@ public class WorldGenerator {
     }
 
     /** helper function of connectTwoRooms */
-    private static void drawVerticalHallway(TETile[][] world, Random random, int y1, int y2, int x) {
+    private static void drawVerticalHallway(TETile[][] world, Random random,
+                                            int y1, int y2, int x) {
         int width = RandomUtils.uniform(random, 1, 3);
         int start = Math.min(y1, y2);
         int end = Math.max(y1, y2);
@@ -226,7 +228,7 @@ public class WorldGenerator {
         return false;
     }
 
-    private static class Edge implements Comparable<Edge>{
+    private static class Edge implements Comparable<Edge> {
         int r1;
         int r2;
         int weight;
